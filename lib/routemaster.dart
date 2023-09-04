@@ -1,29 +1,31 @@
 library routemaster;
 
-export 'src/parser.dart';
-export 'src/pages/guard.dart';
-export 'src/pages/transition_page.dart';
-
 import 'dart:async';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
+
 import 'src/not_found_page.dart';
 import 'src/pages/guard.dart';
 import 'src/path_parser.dart';
 import 'src/system_nav.dart';
 import 'src/trie_router/trie_router.dart';
 
+export 'src/pages/guard.dart';
+export 'src/pages/transition_page.dart';
+export 'src/parser.dart';
+
 part 'src/observers.dart';
-part 'src/route_data.dart';
-part 'src/route_history.dart';
 part 'src/pages/cupertino_tab_page.dart';
 part 'src/pages/indexed_page.dart';
-part 'src/pages/pages.dart';
 part 'src/pages/page_stack.dart';
+part 'src/pages/pages.dart';
 part 'src/pages/stack_page.dart';
 part 'src/pages/tab_page.dart';
+part 'src/route_data.dart';
+part 'src/route_history.dart';
 
 /// A function that builds a [Page] from given [RouteData].
 typedef PageBuilder = RouteSettings Function(RouteData route);
@@ -892,7 +894,12 @@ class RoutemasterDelegate extends RouterDelegate<RouteData>
       'Tried to call route builder outside of build phase',
     );
 
-    return routesBuilder(context);
+    final routeMap = routesBuilder(context);
+    if (!identical(_state.routeMap, routeMap)) {
+      //if changed routeMap, then clear history completely
+      history.clear(leaveCurrent: false);
+    }
+    return routeMap;
   }
 
   /// If there's a current route matching the path in the tree, return it.
